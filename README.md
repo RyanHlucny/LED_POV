@@ -37,3 +37,7 @@ solid cube_corner
   endfacet
 endsolid
 ```
+
+And here's a 3D model from our actual project: 
+
+["V2-Blade"](V2-Blade.stl)
