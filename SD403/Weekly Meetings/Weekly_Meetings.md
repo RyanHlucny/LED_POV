@@ -136,7 +136,7 @@ At the same time, we were designing the electronics core which would go on the o
 ### The Next Day
 
 ![bearingBlockAssembled](/SD403/Media/Images/BearingBlockAssembled.jpg)
-Bearing block assembled with snapring to hold it togehter.
+Bearing block assembled with snapring to hold it together.
 
 ![frameWithBearingBlock](/SD403/Media/Images/FrameWIthBearingBlock.jpg)
 Frame with bearing block mounted.
