@@ -17,16 +17,19 @@ This document shows our weekly meetings and progress throughout the semester.
 
 ### Feb 9, 2024
 
-![feb-9-2024-meeting](.\images\02_09_2024_Meeting.jpg)
+![feb-9-2024-meeting](..\Media\Images\02_09_2024_Meeting.jpg)
 
 ### Feb 15, 2024
 
-![feb-15-2024-meeting-1](.\images\02_15_2024_Meeting_1.jpg)
-![feb-15-2024-meeting-2](.\images\02_15_2024_Meeting_2.jpg)
+![feb-15-2024-meeting-1](..\Media\Images\02_15_2024_Meeting_1.jpg)
+![feb-15-2024-meeting-2](..\Media\Images\02_15_2024_Meeting_2.jpg)
 
 ### Feb 22, 2024
 
-![feb-22-2024-meeting](.\images\02_22_2024_Meeting.jpg)
+![feb-22-2024-meeting](..\Media\Images\02_22_2024_Meeting.jpg)
+
+<!-- ![matlab](..\Media\Videos\PXL_20240223_021548078.mp4) -->
+<video src='..\Media\Videos\PXL_20240223_021548078.mp4' width=720>
 
 ### Feb 29, 2024
 
@@ -34,21 +37,21 @@ No Pictures from our meeting this week.
 
 ### Mar 21, 2024
 
-![mar-21-2024-meeting](.\images\03_21_2024_Meeting.jpg)
+![mar-21-2024-meeting](..\Media\Images\03_21_2024_Meeting.jpg)
 
 ### Apr 5, 2024
 
-![apr-5-2024-meeting](.\images\04_05_2024_Meeting.jpg)
+![apr-5-2024-meeting](..\Media\Images\04_05_2024_Meeting.jpg)
 
 ### Apr 11, 2024
 
-![apr-11-2024-meeting-1](.\images\04_11_2024_Meeting_1.jpg)
-![apr-11-2024-meeting-2](.\images\04_11_2024_Meeting_2.jpg)
-![apr-11-2024-meeting-3](.\images\04_11_2024_Meeting_3.jpg)
-![apr-11-2024-meeting-4](.\images\04_11_2024_Meeting_4.jpg)
-![apr-11-2024-meeting-5](.\images\04_11_2024_Meeting_5.jpg)
+![apr-11-2024-meeting-1](..\Media\Images\04_11_2024_Meeting_1.jpg)
+![apr-11-2024-meeting-2](..\Media\Images\04_11_2024_Meeting_2.jpg)
+![apr-11-2024-meeting-3](..\Media\Images\04_11_2024_Meeting_3.jpg)
+![apr-11-2024-meeting-4](..\Media\Images\04_11_2024_Meeting_4.jpg)
+![apr-11-2024-meeting-5](..\Media\Images\04_11_2024_Meeting_5.jpg)
 
 ### Apr 18, 2024
 
-![Apr-18-2024-meeting-1](.\images\04_18_2024_Meeting_1.jpg)
-![Apr-18-2024-meeting-2](.\images\04_18_2024_Meeting_2.jpg)
+![Apr-18-2024-meeting-1](..\Media\Images\04_18_2024_Meeting_1.jpg)
+![Apr-18-2024-meeting-2](..\Media\Images\04_18_2024_Meeting_2.jpg)
