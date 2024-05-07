@@ -28,7 +28,7 @@ This document shows our weekly meetings and progress throughout the semester.
 
 ![feb-22-2024-meeting](/SD403/Media/Images/02_22_2024_Meeting.jpg)
 
-https://github.com/RyanHlucny/LED_POV/assets/31110301/42810335-452b-4e79-9028-6839577081e5
+https://github.com/RyanHlucny/LED_POV/assets/31110301/b2b64ef9-6dbf-48fa-892e-a6407bdd5961
 
 ### Feb 29, 2024
 
