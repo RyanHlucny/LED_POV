@@ -1,6 +1,6 @@
-# Build Log - LED_POV
+# Weekly Meetings - LED_POV
 
-## SD_403_Sp24_06
+## SD_403_Sp24_06 LED Spinner
 
 This document shows our weekly meetings and progress throughout the semester.
 
@@ -30,7 +30,7 @@ This document shows our weekly meetings and progress throughout the semester.
 
 ### Feb 29, 2024
 
-<!-- ![feb-29-2024-meeting](.\images\02_29_2024_Meeting.jpg) -->
+No Pictures from our meeting this week.
 
 ### Mar 21, 2024
 
