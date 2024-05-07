@@ -52,6 +52,7 @@ Assembled Power electronics for the first time.
 First time getting Dotstar LEDs to run from our Raspberry Pi Pico W using arduino-core and Platform.io.
 
 ![fullStrip](/SD403/Media/Images/FullStrip.jpg)
+
 Got the full strip to light solid while experimenting with SPI clock frequency. With this long of a strip (144 LEDs) we found the colors would start to fizzle out by the end of the strip if running too high of a frequency. Very stable at ~15 MHz, which is roughly half of the maximum frequency for the Dotstar LED chip.
 
 ![aluminumHub](/SD403/Media/Images/AluminumHub.jpg)
