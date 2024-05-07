@@ -106,6 +106,7 @@ Miller Welder used.
 Milling the channel.
 
 https://github.com/RyanHlucny/LED_POV/assets/31110301/78458494-9d27-485f-92d1-7b921a663872
+
 Milling operation video. This is done on a Bridgeport manual upright end mill.
 
 ![fitmentTest](/SD403/Media/Images/FitmentTest.jpg)
@@ -162,6 +163,7 @@ Cutsection of the top ASM
 ![apr-11-2024-meeting-5](/SD403/Media/Images/04_11_2024_Meeting_5.jpg)
 
 https://github.com/RyanHlucny/LED_POV/assets/31110301/fd784f13-caec-4af9-b8e1-2b49033294a1
+
 First test running with the COTS slipring. All the electronics are spinning with the machine here, and it's getting power from a slip ring device.
 
 ### Apr 18, 2024
