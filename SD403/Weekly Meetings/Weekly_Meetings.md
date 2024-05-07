@@ -28,11 +28,7 @@ This document shows our weekly meetings and progress throughout the semester.
 
 ![feb-22-2024-meeting](/SD403/Media/Images/02_22_2024_Meeting.jpg)
 
-<!-- ![matlab](/SD403/Media/Videos/PXL_20240223_021548078.mp4) -->
-
-<!-- <video src='/SD403/Media/Videos/PXL_20240223_021548078.mp4'></video> -->
-
-https://github.com/RyanHlucny/LED_POV/blob/adb16ea9db47326476cc65f5f405aa0d52ddd574/SD403/Media/Videos/PXL_20240223_021548078.mp4
+https://github.com/RyanHlucny/LED_POV/assets/31110301/42810335-452b-4e79-9028-6839577081e5
 
 ### Feb 29, 2024
 
