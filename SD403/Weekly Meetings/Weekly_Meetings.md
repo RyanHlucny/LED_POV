@@ -28,8 +28,8 @@ This document shows our weekly meetings and progress throughout the semester.
 
 ![feb-22-2024-meeting](/SD403/Media/Images/02_22_2024_Meeting.jpg)
 
-<!-- ![matlab](..\Media\Videos\PXL_20240223_021548078.mp4) -->
-<video src='..\Media\Videos\PXL_20240223_021548078.mp4' width=720>
+![matlab](/SD403/Media/Videos/PXL_20240223_021548078.mp4)
+<!-- <video src='..\Media\Videos\PXL_20240223_021548078.mp4' width=720> -->
 
 ### Feb 29, 2024
 
