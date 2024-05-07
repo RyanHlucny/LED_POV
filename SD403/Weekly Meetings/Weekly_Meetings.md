@@ -31,6 +31,7 @@ This document shows our weekly meetings and progress throughout the semester.
 ![feb-22-2024-meeting](/SD403/Media/Images/02_22_2024_Meeting.jpg)
 
 https://github.com/RyanHlucny/LED_POV/assets/31110301/b2b64ef9-6dbf-48fa-892e-a6407bdd5961
+
 MATLAB pixel transformation of a cartesian style pixel grid to polar style. This is necessary since the pixels will be spinning on the rotating platform. I will use the MATLAB program to generate a look-up-table (LUT) which will reduce the computational load for the Pico, and will only have to look-up pixel colors instead of performing the image transform itself. MATLAB is useful!
 
 ### Feb 29, 2024
@@ -52,7 +53,6 @@ Assembled Power electronics for the first time.
 First time getting Dotstar LEDs to run from our Raspberry Pi Pico W using arduino-core and Platform.io.
 
 ![fullStrip](/SD403/Media/Images/FullStrip.jpg)
-
 Got the full strip to light solid while experimenting with SPI clock frequency. With this long of a strip (144 LEDs) we found the colors would start to fizzle out by the end of the strip if running too high of a frequency. Very stable at ~15 MHz, which is roughly half of the maximum frequency for the Dotstar LED chip.
 
 ![aluminumHub](/SD403/Media/Images/AluminumHub.jpg)
