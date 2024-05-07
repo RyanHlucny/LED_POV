@@ -169,4 +169,4 @@ First test running with the COTS slipring. All the electronics are spinning with
 ### Apr 18, 2024
 
 ![Apr-18-2024-meeting-1](/SD403/Media/Images/04_18_2024_Meeting_1.jpg)
-![Apr-18-2024-meeting-2](./SD403/Media/Images/04_18_2024_Meeting_2.jpg)
+![Apr-18-2024-meeting-2](/SD403/Media/Images/04_18_2024_Meeting_2.jpg)
