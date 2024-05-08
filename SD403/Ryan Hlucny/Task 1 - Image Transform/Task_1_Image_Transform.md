@@ -74,10 +74,6 @@ B
 \end{bmatrix}
 ```
 
-```math
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
-```
-
 which is our look-up-table.
 
 The thing that makes this LUT useful is the fact that the microcontroller won't have to do any of these transformation calculations on-board, but all of it can be done before-hand in pre-processing.
