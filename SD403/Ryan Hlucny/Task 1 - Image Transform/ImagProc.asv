@@ -30,7 +30,7 @@ C = imcrop(B,r); dimsC = size(C);
 image(C); axis image; title('Center Square Crop');
 rectangle('Position',[0 0 dimsC(1) dimsC(2)],'Curvature',[1 1]);
 
-%% Polar Plotting and LUT Construction
+%% Polar Plotting
 num_LEDs_right = 43; % 43
 num_LEDs_left = 43; % 41
 ledSpacing = 0.2734; % Distance from center to center of LEDs in inches
@@ -54,33 +54,30 @@ y = zeros(length(r),length(q));
 c = zeros(length(r),length(q),3);
 
 figure(2); clf(2); tiledlayout('vertical');
-
 % Variable parameters
 % Represents a variable amount of 'twist' to predistort the image to help
 % compensate for time lag in leds changing color. A value of 1 represents
 % one full rotation at the outer ring of pixels. Set to 0 to disable
-twist_const = 0.05;
+twist_const = 0.0;
 
-[Q_twist,R] = meshgrid(q,r/r_max);
-[m1,m2] = meshgrid(q,linspace(0,twist_const*2*pi,length(r)))
+% [Q_twist,R] = meshgrid(q+r/r_max*2*pi,r/r_max);
+
 nexttile;
-plot(R.*cos(Q_twist-m2),R.*sin(Q_twist-m2)); grid on; axis equal;
-xlim([-1 1]); ylim([-1 1]); title("Twist Visualization");
-subtitle(sprintf('Twist Factor = %f',twist_const));
+plot(R.*cos(Q),R.*sin(Q));
+
 % Represents the relative brightness of the center pixel compared
 % to the pixels at the outer edge. Set to '1' to disable
-relative_brightness_const = 0.75;
+relative_brightness_const = 0.9;
 
 [Q,R] = meshgrid(q,r/r_max);
 b = relative_brightness_const;
-brightness_comp = (1-b)*sqrt((R.*cos(Q)).^2+(R.*sin(Q)).^2)+b;
+brightess_comp = (1-b)*sqrt((R.*cos(Q)).^2+(R.*sin(Q)).^2)+b;
 % Plot brightness compensation surface (Z is the relative brightness)
 nexttile;
-surf(R.*cos(Q),R.*sin(Q),brightness_comp,'EdgeAlpha',0.25); axis equal; zlim([0,1]);
-colorbar; colormap winter; title("Brightness Height Map");
-subtitle(sprintf('Relative Brightness Compensation = %f',relative_brightness_const));
+surf(R.*cos(Q),R.*sin(Q),brightess_comp,'EdgeAlpha',0.25); axis equal; zlim([0,1]);
+colorbar; colormap winter;
 
-% Construction of LUT
+% Creation of LUT
 idx = 0;
 for j = 1:length(q), for i = 1:length(r)
     theta = -q(j)+pi/2;
@@ -100,20 +97,18 @@ for j = 1:length(q), for i = 1:length(r)
     y_transform_twist = max(round(h/2-y_twist*scaley),1);
     
     rgb = C(y_transform_twist,x_transform_twist,:);
+    c(i,j,:) = rgb;
     
-    % Brightness Compensation
-    c(i,j,:) = rgb * brightness_comp(i,j);
-
 end, end
 
 % Plotting
-nexttile; 
+nexttile;
 x_prime = reshape(x,[size(x,1)*size(x,2) 1]);
 y_prime = reshape(y,[size(y,1)*size(y,2) 1]);
 c_prime = reshape(c,[size(c,1)*size(c,2) 3]);
 scatter(x_prime,y_prime,10,double(c_prime)/255,"filled"); grid on; axis equal;
 xlabel('x (inches)'); ylabel('y (inches)');
-xlim([-13 13]); ylim([-13 13]); title("Rendered LUT");
+xlim([-13 13]); ylim([-13 13]);
 
 
 %% Simulation
