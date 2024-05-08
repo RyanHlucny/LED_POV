@@ -31,3 +31,14 @@ The data sheet provides the data frame required to control the SK9822 using the 
 ### Code
 
 The SK9822 can be driven with a serial data frequency up to 30 MHz. However, at such high frequencies, we found the data signal fidelity would deteriorate as it propogates through the LED strip. It works fine at 30 MHz for ~10 LEDs, but with a longer strip the data signal is attennuated to the point that the color becomes corrupted. For a strip of 144 LEDs, I found that around 15 MHz worked well for signal fidelity and the signal made it to the end of the strip without any noticeable deterioration.
+
+I am going to use SPI communication techniques to communicate to the LEDs according to the above data structure.
+
+My code for the SPI protocol is shown here below
+
+```cpp
+
+int hello = 1;
+Bob bob = new Bob(hello);
+
+```

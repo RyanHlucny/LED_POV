@@ -59,7 +59,7 @@ figure(2); clf(2); tiledlayout('vertical');
 % Represents a variable amount of 'twist' to predistort the image to help
 % compensate for time lag in leds changing color. A value of 1 represents
 % one full rotation at the outer ring of pixels. Set to 0 to disable
-twist_const = 0.05;
+twist_const = 0.075;
 
 [Q_twist,R] = meshgrid(q,r/r_max);
 [m1,m2] = meshgrid(q,linspace(0,twist_const*2*pi,length(r)))
@@ -69,7 +69,7 @@ xlim([-1 1]); ylim([-1 1]); title("Twist Visualization");
 subtitle(sprintf('Twist Factor = %f',twist_const));
 % Represents the relative brightness of the center pixel compared
 % to the pixels at the outer edge. Set to '1' to disable
-relative_brightness_const = 0.75;
+relative_brightness_const = 0.5;
 
 [Q,R] = meshgrid(q,r/r_max);
 b = relative_brightness_const;

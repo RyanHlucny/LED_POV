@@ -64,13 +64,7 @@ This code produces the following plots. Note that I am not reducing the image at
 
 ### Pixel Transformation
 
-The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form
-$$ \begin{bmatrix}
-R\\
-G\\
-B
-\end{bmatrix}$$
-which is our look-up-table.
+The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form $$\begin{bmatrix} R\\ G\\ B \end{bmatrix}$$ which is our look-up-table.
 
 The thing that makes this LUT useful is the fact that the microcontroller won't have to do any of these transformation calculations on-board, but all of it can be done before-hand in pre-processing.
 
@@ -176,15 +170,15 @@ The Matlab script I wrote generates a twist visualization plot to visualize the 
 
 Another factor that needs to be compensated is the brightness. As the device spins, at each $\Delta\theta$, the LEDs will get a new color command. The outer ring of LEDs are physically moving faster, which means the light from each LED is less concentrated in one spot in each $\Delta\theta$ interval.
 
-Therefore a brightness compensation is required to equalize the brightness from the center of the image to the outside. Since the speed of each pixel is linearly proportional to radius, that is
-$$
-v \propto r
-$$,
-the brightness compensation is implemented as a conical surface. The code above also displays a brightness height map visualization
+Therefore a brightness compensation is required to equalize the brightness from the center of the image to the outside. The speed of each pixel is linearly proportional to radius, that is $$v \propto r$$ Hence the brightness compensation is implemented as a conical surface. The code above also displays a brightness height map visualization
 
 ![brightness-map](/SD403/Media/Images/brightness-map.png)
 
 The relative brightness compensation of 0.75 means the center pixels are 75% the brightness of the outside pixels.
+
+The resulting image, after applying the twist and brightness compensation (compensation factors enlarged for the sake of viewing) would look like the following
+
+https://github.com/RyanHlucny/LED_POV/assets/31110301/453112db-85e5-4b11-892b-0687b9dbed2b
 
 ### Summary
 
