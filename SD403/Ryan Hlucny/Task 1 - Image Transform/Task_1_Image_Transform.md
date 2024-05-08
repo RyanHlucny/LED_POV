@@ -64,7 +64,21 @@ This code produces the following plots. Note that I am not reducing the image at
 
 ### Pixel Transformation
 
-The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form $$\begin{bmatrix} R\\ G\\ B \end{bmatrix}$$ which is our look-up-table.
+The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form 
+
+```math
+\begin{bmatrix} 
+R\\ 
+G\\ 
+B 
+\end{bmatrix}
+```
+
+```math
+\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
+```
+
+which is our look-up-table.
 
 The thing that makes this LUT useful is the fact that the microcontroller won't have to do any of these transformation calculations on-board, but all of it can be done before-hand in pre-processing.
 
