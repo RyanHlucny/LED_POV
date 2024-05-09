@@ -5,11 +5,12 @@
 #define freq 1000000
 
 
-SPI_LED ledStrip0(2, BGR, &SPI, SPISettings(freq, MSBFIRST, SPI_MODE0));
+SPI_LED ledStrip0(3, BGR, &SPI, SPISettings(freq, MSBFIRST, SPI_MODE0));
 // SPI_LED ledStrip1(43, BGR, &SPI1, SPISettings(freq, MSBFIRST, SPI_MODE0));
-uint8_t c1[2][3] = {{0, 0, 255},{0, 255, 0}};
-uint8_t c2[2][3] = {{0, 255, 0},{0, 0, 255}};
-uint8_t c3[2][3] = {{0, 0, 0},{0, 0, 0}};
+uint8_t c1[3][3] = {{0, 0, 255},{0, 255, 0},{255, 0, 0}};
+uint8_t c2[3][3] = {{0, 255, 0},{0, 0, 255},{0, 255, 0}};
+uint8_t c3[3][3] = {{0, 0, 0},{0, 0, 0}};
+uint8_t c4[2][3] = {{255, 0, 0}, {0, 0, 255}};
 
 void setup() {   
     SPI.setSCK(PIN_SPI0_SCK);
@@ -36,13 +37,13 @@ void loop() {
     digitalWrite(PIN_LED, 1);
     // ledStrip0.setPixelColor(0,255,0,0);
     // ledStrip0.setPixelColor(1,0,255,0);
-    ledStrip0.setStrip(*c1);
+    ledStrip0.setStrip(&c1[0][0], sizeof(c1));
     ledStrip0.write();
     delay(500);
     digitalWrite(PIN_LED,0);
     // ledStrip0.setPixelColor(1,255,0,0);
     // ledStrip0.setPixelColor(0,0,255,0);
-    ledStrip0.setStrip(*c2);
+    ledStrip0.setStrip(&c4[0][0], sizeof(c4), 0);
     ledStrip0.write();
     delay(500);
     ledStrip0.clear();

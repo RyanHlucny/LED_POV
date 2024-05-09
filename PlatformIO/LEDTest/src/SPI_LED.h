@@ -18,7 +18,8 @@ class SPI_LED
         SPI_LED(uint16_t numLEDs, uint8_t pixelType = BRG, SPIClass* spi = &SPI, SPISettings spiSettings = SPISettings(1000000, MSBFIRST, SPI_MODE0));
         void begin();
         void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b);
-        void setStrip(uint8_t* pixelArray);
+        void setStrip(uint8_t* newPixelArrayPtr, uint16_t size);
+        void setStrip(uint8_t* newPixelArrayPtr, uint16_t size, uint16_t startPixel);
         void write();
         void clear();
 
@@ -27,7 +28,7 @@ class SPI_LED
         SPISettings spiSettings;
         uint16_t numLEDs;
         uint32_t freq;
-        uint8_t* pixelArray;
+        uint8_t* pixelArrayPtr;
         uint8_t redOffset;
         uint8_t greenOffset;
         uint8_t blueOffset;
