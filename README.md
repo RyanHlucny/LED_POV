@@ -8,5 +8,4 @@ The Documentation for this project is done using [GitHub Flavored Markdown (GFM)
 
 ## Media
 
-Photos and videos from the project have been added to this [Google Photos Album](https://photos.app.goo.gl/s6BoLq5Lydn7EBvv7
-).
+Photos and videos from the project have been added to this [Google Photos Album](https://photos.app.goo.gl/s6BoLq5Lydn7EBvv7).

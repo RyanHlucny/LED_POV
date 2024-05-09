@@ -1,4 +1,4 @@
-# HW04 - Task 2 - LED Control
+# HW05 - Task 2 - LED Control
 
 ## Ryan Hlucny
 
@@ -6,7 +6,31 @@
 
 My second task includes controlling the LEDs. The Dotstar LED from Adafruit can be found [here](https://www.adafruit.com/product/2328#technical-details). The actual chip inside the "Dotstar" LED is the [SK9822](https://cdn-shop.adafruit.com/product-files/2343/SK9822_SHIJI.pdf).
 
-The data sheet provides the data frame required to control the SK9822 using the [SPI](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) protocol.
+The data sheet provides the data frame required to control the SK9822 using the [SPI](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) protocol. SPI stands for Serial Peripheral Interface, which is a simple communication protocol that includes a master and (multiple) slave device(s). The following diagram shows a basic overview.
+
+```mermaid
+  flowchart LR
+    A(Master) -- MOSI --> B(Slave)
+    B -- MISO --> A
+    A --Data--> B
+    A -- Clock--> B
+```
+
+`MOSI`: Master Out Slave In
+
+`MISO`: Master In Slave Out
+
+`Data`: Data line
+
+`Clock`: Clock line
+
+The Raspberry Pi Pico W has 2 dedicated hardware SPI busses. Each LED strip is going to have its own dedicated Hardware SPI bus.
+
+```mermaid
+  flowchart LR
+    A(Pico W) -- SPI0 --> L1(LED Strip 0)
+    A -- SPI1 --> L2(LED Strip 1) 
+```
 
 ### Data Structure
 
