@@ -130,7 +130,7 @@ void SPI_LED::write() {
 
 ### Demo Code
 
-The following code example shows how to use the library that I made, and will be followed with a video demo as well. In order to use the class, you just need to create an **SPI_LED** object with the number of LEDs, the color ordering, a pointer to the SPI interface object to use, as well as the SPI settings to configure the SPI for communication (frequency, data order, SPI mode). Since I will be using two strips and both SPI interfaces on the Pico W, I will have to create two **SPI_LED** objects.
+The following code example shows how to use the library that I made, and will be followed with a video demo as well. In order to use the class, you just need to create an **SPI_LED** object with the number of LEDs, the color ordering, a pointer to the SPI interface object to use, as well as the SPI settings to configure the SPI for communication (frequency, data order, SPI mode). Since I will be using two strips and both SPI interfaces on the Pico W, I will have to create two **SPI_LED** objects in the final code for the project.
 
 ```c++
 #include <Arduino.h>
