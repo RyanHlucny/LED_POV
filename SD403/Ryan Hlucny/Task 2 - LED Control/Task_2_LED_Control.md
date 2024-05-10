@@ -56,17 +56,32 @@ The Raspberry Pi Pico W has 2 dedicated hardware SPI busses. Each LED strip is g
 
 The SK9822 can be driven with a serial data frequency up to 30 MHz. However, at such high frequencies, we found the data signal fidelity would deteriorate as it propogates through the LED strip. It works fine at 30 MHz for ~10 LEDs, but with a longer strip the data signal is attennuated to the point that the color becomes corrupted. For a strip of 144 LEDs, I found that around 15 MHz worked well for signal fidelity and the signal made it to the end of the strip without any noticeable deterioration.
 
-I am going to use SPI communication techniques to communicate to the LEDs according to the above data structure.
-
-So I made a custom SPI LED library in C++. It's a simple header and implementation file, which is included in the PlatformIO -> LEDTest project in this repository. I will also include the source code at the bottom of this document.
+In order to use SPI communication techniques to communicate to the LEDs, you need to follow the above data structure. So I made a custom SPI LED library in C++ to accomplish this. It's a simple header and implementation file, which is included in the PlatformIO/LEDTest project in this repository. I will also include the source code at the bottom of this document.
 
 The most important parts are the `SPI_LED::setStrip()` and `SPI_LED::write()` functions, which I will dive into now.
 
 ### `SPI_LED::setStrip()`
 
+`pixelArray`
+| `led0` | `led1` | `led2` | ... |
+| :---: | :---: | :---: | :---: |
+| `[0  0  0]` | `[0  0  0]` | `[0  0  0]` | - - - |
+
 Every **SPI_LED** object has its own `pixelArray` allocated in memory. This array is allocated to store all the RGB values for each pixel in the strip. The number of LEDs, the color ordering (RGB, BGR, GRB, etc), a pointer to the SPI interface object to use, as well as the SPI settings to configure the SPI for communication (frequency, data order, SPI mode), are all passed into the constructor and are initialized as private fields upon creation of an **SPI_LED** object.
 
+`newPixelArray`
+| `led0` | `led1` | `led2` | `...` |
+| :---: | :---: | :---: | :---: |
+| `[255  0  0]` | `[0  255  0]` | `[0  0  255]` | `...` |
+
 The `setStrip()` function takes in a new pixel array and copies the values into the **SPI_LED** object's `pixelArray` in memory. It does this by taking a pointer to the beginning of the new array and the size of that array in bytes, and then it uses the `std::copy` function built into the `std` library to copy the elements from the given array elements to the `pixelArray` pre-allocated at the creation of an **SPI_LED** object.
+
+Performing `ledStrip.setStrip(&newPixelArray[0][0], sizeof(newPixelArray))` yields:
+
+`pixelArray`
+| `led0` | `led1` | `led2` | `...` |
+| :---: | :---: | :---: | :---: |
+| `[255  0  0]` | `[0  255  0]` | `[0  0  255]` | `...` |
 
 ```c++
 void SPI_LED::setStrip(uint8_t* newPixelArrayPtr, uint16_t size) {
@@ -75,6 +90,8 @@ void SPI_LED::setStrip(uint8_t* newPixelArrayPtr, uint16_t size) {
 ```
 
 The elements must be copied to isolate the memory space of the **SPI_LED** `pixelArray` and to avoid memory corruption of the arrays.
+
+Although it's not explicitly stated here, you can set partial arrays to only change a portion of the led strip. There is a variant of the `SPI_LED::setStrip` function which allows you to set a starting pixel index so you can set a desired region of pixels to the given pixel array.
 
 ### `SPI_LED::write()`
 

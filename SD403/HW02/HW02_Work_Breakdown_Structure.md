@@ -6,17 +6,25 @@
 flowchart TB
   subgraph one [ ]
     L1(Level 1)
-    A("`Project
-    LED Spinning Display`")
+    A("
+    Project 
+    LED Spinning Display
+    ")
   end
   subgraph two [ ]
     L2(Level 2)
-    A --> B1["`Ryan Hlucny
-    Software/Controls`"]
-    A --> B2["`Austin Houle
-    Power Electronics`"]
-    A --> B3["`Austin Kallhoff
-    Mechanical/Hardware`"]
+    A --> B1("
+    Ryan Hlucny
+    Software/Controls
+    ")
+    A --> B2("
+    Austin Houle
+    Power Electronics
+    ")
+    A --> B3("
+    Austin Kallhoff
+    Mechanical/Hardware
+    ")
   end
   subgraph three [ ]
     L3(Level 3)

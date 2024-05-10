@@ -17,32 +17,20 @@ void setup() {
     SPI.setRX(PIN_SPI0_MISO);
     SPI.setCS(PIN_SPI0_SS);
 
-    // SPI1.setSCK(PIN_SPI1_SCK);
-    // SPI1.setTX(PIN_SPI1_MOSI);
-    // SPI1.setRX(PIN_SPI1_MISO);
-    // SPI1.setCS(PIN_SPI1_SS);   
-
     ledStrip0.begin();
-    // ledStrip1.begin();
-
     ledStrip0.clear();
-    // ledStrip1.clear();
     ledStrip0.write();
 
     pinMode(PIN_LED, OUTPUT);
 }
 
 void loop() {
-//   ledStrip1.write();
+
     digitalWrite(PIN_LED, 1);
-    // ledStrip0.setPixelColor(0,255,0,0);
-    // ledStrip0.setPixelColor(1,0,255,0);
     ledStrip0.setStrip(&c1[0][0], sizeof(c1));
     ledStrip0.write();
     delay(500);
     digitalWrite(PIN_LED,0);
-    // ledStrip0.setPixelColor(1,255,0,0);
-    // ledStrip0.setPixelColor(0,0,255,0);
     ledStrip0.setStrip(&c2[0][0], sizeof(c2));
     ledStrip0.write();
     delay(500);
