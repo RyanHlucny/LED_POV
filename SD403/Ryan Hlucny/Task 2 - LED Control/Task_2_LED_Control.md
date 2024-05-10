@@ -62,14 +62,14 @@ The most important parts are the `SPI_LED::setStrip()` and `SPI_LED::write()` fu
 
 ### `SPI_LED::setStrip()`
 
-`pixelArray`
+`pixelArray =`
 | `led0` | `led1` | `led2` | ... |
 | :---: | :---: | :---: | :---: |
 | `[0  0  0]` | `[0  0  0]` | `[0  0  0]` | - - - |
 
 Every **SPI_LED** object has its own `pixelArray` allocated in memory. This array is allocated to store all the RGB values for each pixel in the strip. The number of LEDs, the color ordering (RGB, BGR, GRB, etc), a pointer to the SPI interface object to use, as well as the SPI settings to configure the SPI for communication (frequency, data order, SPI mode), are all passed into the constructor and are initialized as private fields upon creation of an **SPI_LED** object.
 
-`newPixelArray`
+`newPixelArray =`
 | `led0` | `led1` | `led2` | `...` |
 | :---: | :---: | :---: | :---: |
 | `[255  0  0]` | `[0  255  0]` | `[0  0  255]` | `...` |
@@ -78,7 +78,7 @@ The `setStrip()` function takes in a new pixel array and copies the values into 
 
 Performing `ledStrip.setStrip(&newPixelArray[0][0], sizeof(newPixelArray))` yields:
 
-`pixelArray`
+`pixelArray =`
 | `led0` | `led1` | `led2` | `...` |
 | :---: | :---: | :---: | :---: |
 | `[255  0  0]` | `[0  255  0]` | `[0  0  255]` | `...` |
