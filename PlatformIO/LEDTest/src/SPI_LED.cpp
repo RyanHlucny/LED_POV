@@ -1,5 +1,4 @@
 #include "SPI_LED.h"
-#include <iostream>
 
 /**
  * The SPI interface passed in must have the MOSI, MISO, clokc, and data lines set prior to construction of this object.
@@ -59,6 +58,12 @@ void SPI_LED::setStrip(uint8_t* newPixelArrayPtr, uint16_t size) {
     std::copy(newPixelArrayPtr, newPixelArrayPtr + size, this->pixelArrayPtr);
 }
 
+/**
+ * @brief Overload setStrup function which allows you to specify the starting pixel location to set only parts of a strip
+ * @param newPixelArrayPtr pointer to thef irst pixel of the new pixel array
+ * @param size the length of the new pixel array in bytes
+ * @param startPixel the index of the first pixel to write (the first led index is 0)
+ */
 void SPI_LED::setStrip(uint8_t* newPixelArrayPtr, uint16_t size, uint16_t startPixel) {
     std::copy(newPixelArrayPtr, newPixelArrayPtr + size, this->pixelArrayPtr + startPixel * 3);
 }
@@ -98,5 +103,3 @@ void SPI_LED::write() {
 void SPI_LED::clear() {
     memset(pixelArrayPtr, 0, numLEDs * 3); // 3 bytes/pixel
 }
-
-
