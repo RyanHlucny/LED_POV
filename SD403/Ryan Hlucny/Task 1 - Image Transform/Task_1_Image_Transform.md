@@ -64,7 +64,7 @@ This code produces the following plots. Note that I am not reducing the image at
 
 ### Pixel Transformation
 
-The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form 
+The general approach to the pixel transformation is shifting the origin from the corner of the image to the center and then constructing a new matrix $c(r,\theta)$ which returns a color vector of the form
 
 ```math
 \begin{bmatrix} 

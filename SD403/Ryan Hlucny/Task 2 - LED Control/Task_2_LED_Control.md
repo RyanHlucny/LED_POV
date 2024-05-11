@@ -352,4 +352,3 @@ void SPI_LED::clear() {
     memset(pixelArrayPtr, 0, numLEDs * 3); // 3 bytes/pixel
 }
 ```
-
