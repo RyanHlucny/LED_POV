@@ -43,7 +43,7 @@ r = sort([r_start_right:ledSpacing:r_max_right, r_start_left:ledSpacing:r_max_le
 % dq = px_const/r_max; % Use this for "square-like spacing"
 % dq = 2*pi/275;
 % dq = 0.0106
-dq = 0.0035
+dq = 0.00353868996500354
 q = dq:dq:2*pi;
 
 r_max = max(r_max_right,r_max_left)
@@ -82,6 +82,9 @@ surf(R.*cos(Q),R.*sin(Q),brightness_comp,'EdgeAlpha',0.25); axis equal; zlim([0,
 colorbar; colormap winter; title("Brightness Height Map");
 subtitle(sprintf('Relative Brightness Compensation = %f',relative_brightness_const));
 
+LUT = zeros(1, length(r)*length(q)*3);
+LUTidx = 1;
+
 % Construction of LUT
 idx = 0;
 for j = 1:length(q), for i = 1:length(r)
@@ -105,8 +108,15 @@ for j = 1:length(q), for i = 1:length(r)
     
     % Brightness Compensation
     c(i,j,:) = uint8(rgb * brightness_comp(i,j));
-
+    % Reformat data into flat array and in BGR color ordering
+    LUT(LUTidx:LUTidx+2) = [rgb(3) rgb(2) rgb(1)] * brightness_comp(i,j);
+    LUTidx = LUTidx + 3;
+    
 end, end
+
+% Generating the LUT file as a csv file
+[pathstr,name,ext] = fileparts(info.Filename);
+writematrix(LUT,sprintf("LUT-%s.csv", name));
 
 % Plotting
 nexttile; 

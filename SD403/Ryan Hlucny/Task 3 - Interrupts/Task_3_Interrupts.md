@@ -88,10 +88,107 @@ The Pico W has a flash program memory of 2 MB, so any of these should fit. We wi
 
 Now that we got all the preliminary calculations done, we need to set up interrupts to command the LEDs. The above calculations assumed that each LED command would follow immediately after the previous command (no dead-zone), which requires a specific frequency of sending SPI transmissions. I will call this transmission frequency $f_{transmission}$.
 
-We calculated above the number of transmissions per second $$ f_{transmission} = \frac{f_{SPI}}{B} = \frac{f_{SPI}}{64+32n} \space\space\space transmissions/sec$$ In this context, $n = 53$, since each led strip has its own SPI interface. With $f_{SPI} = 15.625$ MHz, $$f_{transmission} = \frac{15.625 \cdot 10^6}{64+32\cdot53}$$   =  This is the desired frequency of our interrupt to be able to send LED command SPI transmissions seamlessly, one to the next.
+We calculated above the number of transmissions per second $$ f_{transmission} = \frac{f_{SPI}}{B} = \frac{f_{SPI}}{64+32n} \space\space\space transmissions/sec$$ In this context, $n = 53$, since each led strip has its own SPI interface. With $f_{SPI} = 15.625$ MHz, $$f_{transmission} = \frac{15.625 \cdot 10^6}{64+32\cdot53} \approx 8.878 \space kHz$$ This is the desired frequency of our interrupt to be able to send LED command SPI transmissions seamlessly, one to the next. So I will initialize my timer interrupt with a frequency of 8.878 kHz. This can be done as follows:
 
+```c++
+#include <Arduino.h>
+#include <RPi_Pico_TimerInterrupt.h>
 
+#define FLASH_TIMER_FREQ    8877.841
 
-The data sheet of the [SK9822](https://cdn-shop.adafruit.com/product-files/2343/SK9822_SHIJI.pdf) gives a handy formula for computing 
+RPI_PICO_Timer timer0(0);
 
+// Timer ISR
+bool flash_led_callback(struct repeating_timer *t) {
+    return true;
+}
 
+void setup() {
+
+    Serial.begin(9600);
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    timer0.attachInterrupt(FLASH_TIMER_FREQ, flash_led_callback);
+}
+
+void loop() {
+    Serial.println("This is the main loop speaking...");
+    delay(1000);
+}
+```
+
+Using the RPI_PICO_TimerInterrupt library by Khoi Hoang.
+
+Now it's time for the LUT implementation!
+
+### Look-up-Table
+
+The look-up-table is a giant array of uint8_t numbers in a particular order. This giant array of numbers is stored in flash program memory on the Pico. I implemented it as follows:
+
+```c++
+#include <stdint.h>
+
+class LUT {
+    
+  public:
+      static constexpr uint8_t flatimage[564450] = {
+          53,51,12,50,50,11,66,120,118,33,116,132,31,116, ...
+      }
+}
+```
+
+Which is an array of 8-bit integers. There are over half a million integers in this array, so it's not really possible to display them all, but a few example LUTs has been generated and placed in my Task 1 folder. They simple have to be copy-and-pasted into the LUT file in the code, which I will include the source code just below here. You can also see the source code in the InterruptTest project in the PlatformIO folder in this repository.
+
+After deploying the code to the Pico, we have the following memory statistics:
+
+![memoryusage](/SD403/Media/Images/MemoryUsageLUT.png)
+
+Which is awesome! We still have plenty of space left on the Pico for the rest of the program even after adding a massive LUT of image data. Here is a picture of the LUT.
+
+![LUT](/SD403/Media/Images/LUT.jpg)
+
+Now enjoy this video of the comical scale of over half a million numbers...
+
+[LUT Video](https://photos.app.goo.gl/fGBA41dUv3ot5QqcA)
+
+In the final project, I will link the LUT up to the SPI_LED library which I made in Task 2, and use interrupts to perform the array switching, using SPI to transmit the data blazing fast! The last bit is knowing the angle of the device. This will be covered in my 4th task.
+
+### Source Code
+
+```c++
+#include <Arduino.h>
+#include <RPi_Pico_TimerInterrupt.h>
+#include <LUT.cpp>
+
+#define FLASH_TIMER_FREQ    8877.841
+
+RPI_PICO_Timer timer0(0);
+
+// Timer ISR
+bool flash_led_callback(struct repeating_timer *t) {
+  // Add custom LED library calls here to change the LED data of the LED strips. 
+  return true;
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  timer0.attachInterrupt(FLASH_TIMER_FREQ, flash_led_callback);
+}
+
+void loop() {
+  const uint8_t *p = &(LUT::flatimage[0]);
+  Serial.println("B \t G \t R");
+  // Print the color data for the first 10 LEDs
+  for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 3; j++) {
+          Serial.print(*(p+3*i+j));
+          Serial.print("\t");
+      }
+      Serial.println("");
+  }
+  delay(1000);
+}
+
+```
