@@ -193,3 +193,5 @@ https://github.com/RyanHlucny/LED_POV/assets/31110301/453112db-85e5-4b11-892b-06
 ### Summary
 
 The Matlab code is included in this directory so you can take a look at it and play with it as you wish. The output of the program that will be used in the Pico microcontroller is the $c(r,\theta)$ matrix, which is a matrix describing the RGB color values of each pixel as an 8-bit integer.
+
+#### ECE Concept: Image Transform (Image Processing / Analysis)

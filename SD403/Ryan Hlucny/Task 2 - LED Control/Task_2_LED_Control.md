@@ -200,6 +200,8 @@ https://github.com/RyanHlucny/LED_POV/assets/31110301/68bab8f0-ea38-421a-89dd-69
 
 This SPI library will be integrated into the project as a whole. It has several feature which make it particularly nice for our application. More specifically, being able to set the entire `pixelArray` all at once is going to be useful for implementing the image pixel data LUT (Look-up-table) more efficiently.
 
+#### ECE Concept: LED Control Embedded Systems
+
 ### Source Code
 
 #### Source Code Header File "SPI_LED.h"

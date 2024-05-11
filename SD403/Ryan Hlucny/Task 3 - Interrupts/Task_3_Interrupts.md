@@ -151,7 +151,11 @@ Now enjoy this video of the comical scale of over half a million numbers...
 
 [LUT Video](https://photos.app.goo.gl/fGBA41dUv3ot5QqcA)
 
-In the final project, I will link the LUT up to the SPI_LED library which I made in Task 2, and use interrupts to perform the array switching, using SPI to transmit the data blazing fast! The last bit is knowing the angle of the device. This will be covered in my 4th task.
+### Summary
+
+In summary, the timing on a device like this is critical for it to work properly. In fact, that is probably the only hard thing about this entire project: timing. With a time-critical application, we need to be smart with how we control it. Hardware interrupts are the best way to tackle any challenge with precise timing in embedded microcontroller programming. In the final project next semester, I will link the LUT up to the SPI_LED library which I made in Task 2, and use interrupts to perform the array switching, using SPI to transmit the data blazing fast! The last bit is knowing the angle of the device. This will be covered in my 4th task.
+
+#### ECE Concept: Microcontroller Hardware Interrupts
 
 ### Source Code
 
