@@ -31,8 +31,8 @@ image(C); axis image; title('Center Square Crop');
 rectangle('Position',[0 0 dimsC(1) dimsC(2)],'Curvature',[1 1]);
 
 %% Polar Plotting and LUT Construction
-num_LEDs_right = 43; % 43
-num_LEDs_left = 43; % 41
+num_LEDs_right = 53; % 43
+num_LEDs_left = 53; % 41
 ledSpacing = 0.2734; % Distance from center to center of LEDs in inches
 r_start_right = 0.05; % Distance from center of rotation to the first LED on right blade
 r_start_left = r_start_right+ledSpacing/2; % Distance from center of rotation to the first LED on left blade
@@ -41,7 +41,9 @@ r_max_left = num_LEDs_left*ledSpacing;
 r = sort([r_start_right:ledSpacing:r_max_right, r_start_left:ledSpacing:r_max_left]);
 % px_const = dr;
 % dq = px_const/r_max; % Use this for "square-like spacing"
-dq = 2*pi/275;
+% dq = 2*pi/275;
+% dq = 0.0106
+dq = 0.0035
 q = dq:dq:2*pi;
 
 r_max = max(r_max_right,r_max_left)
@@ -51,7 +53,7 @@ h = dimsC(1); w = dimsC(2);
 
 x = zeros(length(r),length(q));
 y = zeros(length(r),length(q));
-c = zeros(length(r),length(q),3);
+c = uint8(zeros(length(r),length(q),3));
 
 figure(2); clf(2); tiledlayout('vertical');
 
@@ -62,7 +64,7 @@ figure(2); clf(2); tiledlayout('vertical');
 twist_const = 0.075;
 
 [Q_twist,R] = meshgrid(q,r/r_max);
-[m1,m2] = meshgrid(q,linspace(0,twist_const*2*pi,length(r)))
+[m1,m2] = meshgrid(q,linspace(0,twist_const*2*pi,length(r)));
 nexttile;
 plot(R.*cos(Q_twist-m2),R.*sin(Q_twist-m2)); grid on; axis equal;
 xlim([-1 1]); ylim([-1 1]); title("Twist Visualization");
@@ -102,7 +104,7 @@ for j = 1:length(q), for i = 1:length(r)
     rgb = C(y_transform_twist,x_transform_twist,:);
     
     % Brightness Compensation
-    c(i,j,:) = rgb * brightness_comp(i,j);
+    c(i,j,:) = uint8(rgb * brightness_comp(i,j));
 
 end, end
 
