@@ -82,7 +82,7 @@ Using the values of $f$ and $\Delta\theta$ from the previous table, we have the 
 |  0.0389  |  51331  |
 |  0.0425  |  47053  |
 
-The Pico W has a flash program memory of 2 MB, so any of these should fit. We will go with a dq of 0.0035 to give us the largest LUT we could need for the operating conditions we will see. With $f = 5$, the device will be spinning at 300 RPM (note that this is below the typical **flicker-fusion-threshold** for adults, though it would be fast enough for a proof-of-concept). which will be easily attainable by our hardware and is a good benchmark speed. Anything faster and it will start "skipping" $\Delta\theta$ steps, which is completely fine and will likely be unnoticeable.
+The Pico W has a flash program memory of 2 MB, so any of these should fit. We will go with $\Delta\theta = 0.0035$ to give us the largest LUT we could need for the operating conditions we will see. With $f = 5$, the device will be spinning at 300 RPM (note that this is below the typical **flicker-fusion-threshold** for adults, though it would be fast enough for a proof-of-concept). which will be easily attainable by our hardware and is a good benchmark speed. Anything faster and it will start "skipping" $\Delta\theta$ steps, which is completely fine and will likely be unnoticeable.
 
 ### Interrupts
 
