@@ -1,4 +1,4 @@
-# HW01 Project Selection
+# HW01 Contact Information
 
 ## SD_403_Sp24_06 LED Spinner
 
