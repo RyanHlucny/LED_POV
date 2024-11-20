@@ -1,6 +1,6 @@
 %% Image importing
 addpath("Images\");
-imgpath = 'NDSU-football.jpg';
+imgpath = 'matlab.png';
 info = imfinfo(imgpath)
 % Handle indexed and RGB images
 if (info.ColorType == "indexed")
@@ -31,29 +31,27 @@ image(C); axis image; title('Center Square Crop');
 rectangle('Position',[0 0 dimsC(1) dimsC(2)],'Curvature',[1 1]);
 
 %% Polar Plotting and LUT Construction
-num_LEDs_right = 53; % 43
-num_LEDs_left = 53; % 41
+num_LEDs_right = 53;
+num_LEDs_left = 53;
 ledSpacing = 0.2734; % Distance from center to center of LEDs in inches
 r_start_right = 0.05; % Distance from center of rotation to the first LED on right blade
 r_start_left = r_start_right+ledSpacing/2; % Distance from center of rotation to the first LED on left blade
 r_max_right = num_LEDs_right*ledSpacing;
 r_max_left = num_LEDs_left*ledSpacing;
-r = sort([r_start_right:ledSpacing:r_max_right, r_start_left:ledSpacing:r_max_left]);
+r_right = r_start_right:ledSpacing:r_max_right;
+r_left = r_start_left:ledSpacing:r_max_left;
+r = sort([r_right, r_left]);
 % px_const = dr;
-% dq = px_const/r_max; % Use this for "square-like spacing"
+dq = ledSpacing/r_max_right; % Use this for "square-like spacing"
 % dq = 2*pi/275;
 % dq = 0.0106
-dq = 0.00353868996500354
+% dq = 0.00353868996500354
 q = dq:dq:2*pi;
 
 r_max = max(r_max_right,r_max_left)
-scalex = dimsC(2)/r_max/2;
-scaley = dimsC(1)/r_max/2;
+scalex = dimsC(2)/r_max;
+scaley = dimsC(1)/r_max;
 h = dimsC(1); w = dimsC(2);
-
-x = zeros(length(r),length(q));
-y = zeros(length(r),length(q));
-c = uint8(zeros(length(r),length(q),3));
 
 figure(2); clf(2); tiledlayout('vertical');
 
@@ -61,7 +59,7 @@ figure(2); clf(2); tiledlayout('vertical');
 % Represents a variable amount of 'twist' to predistort the image to help
 % compensate for time lag in leds changing color. A value of 1 represents
 % one full rotation at the outer ring of pixels. Set to 0 to disable
-twist_const = 0.075;
+twist_const = 0; %0.075;
 
 [Q_twist,R] = meshgrid(q,r/r_max);
 [m1,m2] = meshgrid(q,linspace(0,twist_const*2*pi,length(r)));
@@ -71,7 +69,7 @@ xlim([-1 1]); ylim([-1 1]); title("Twist Visualization");
 subtitle(sprintf('Twist Factor = %f',twist_const));
 % Represents the relative brightness of the center pixel compared
 % to the pixels at the outer edge. Set to '1' to disable
-relative_brightness_const = 0.5;
+relative_brightness_const = 1;%0.5;
 
 [Q,R] = meshgrid(q,r/r_max);
 b = relative_brightness_const;
@@ -82,15 +80,18 @@ surf(R.*cos(Q),R.*sin(Q),brightness_comp,'EdgeAlpha',0.25); axis equal; zlim([0,
 colorbar; colormap winter; title("Brightness Height Map");
 subtitle(sprintf('Relative Brightness Compensation = %f',relative_brightness_const));
 
-LUT = zeros(1, length(r)*length(q)*3);
+% Let right side be long side and left side be short side for now
+LUT_long = zeros(1, length(r_right)*length(q)*3);
 LUTidx = 1;
+x = zeros(length(r_right),length(q));
+y = zeros(length(r_right),length(q));
+c = uint8(zeros(length(r_right),length(q),3));
 
-% Construction of LUT
-idx = 0;
-for j = 1:length(q), for i = 1:length(r)
-    theta = -q(j)+pi/2;
-    x(i,j) = r(i)*cos(theta); % inches
-    y(i,j) = r(i)*sin(theta); % inches
+% Construction of LUT for Long blade
+for j = 1:length(q), for i = 1:length(r_right)
+    theta = -q(j)-pi/2;
+    x(i,j) = r_right(i)*cos(theta); % inches
+    y(i,j) = r_right(i)*sin(theta); % inches
 
     % Transforming from corner-origin cartesian coordinates to
     % centered polar coordinates
@@ -108,24 +109,66 @@ for j = 1:length(q), for i = 1:length(r)
     
     % Brightness Compensation
     c(i,j,:) = uint8(rgb * brightness_comp(i,j));
-    % Reformat data into flat array and in BGR color ordering
-    LUT(LUTidx:LUTidx+2) = [rgb(3) rgb(2) rgb(1)] * brightness_comp(i,j);
+    % Reformat data into flat array and in RBG color ordering
+    LUT_long(LUTidx:LUTidx+2) = [rgb(1) rgb(3) rgb(2)] * brightness_comp(i,j);
     LUTidx = LUTidx + 3;
-    
 end, end
 
-% Generating the LUT file as a csv file
-[pathstr,name,ext] = fileparts(info.Filename);
-writematrix(LUT,sprintf("LUT-%s.csv", name));
-
 % Plotting
-nexttile; 
+figure(3); clf(3); tiledlayout('horizontal'); nexttile;
 x_prime = reshape(x,[size(x,1)*size(x,2) 1]);
 y_prime = reshape(y,[size(y,1)*size(y,2) 1]);
 c_prime = reshape(c,[size(c,1)*size(c,2) 3]);
 scatter(x_prime,y_prime,10,double(c_prime)/255,"filled"); grid on; axis equal;
 xlabel('x (inches)'); ylabel('y (inches)');
-xlim([-13 13]); ylim([-13 13]); title("Rendered LUT");
+xlim([-13 13]); ylim([-13 13]); title("Rendered LUT Long");
+
+LUT_short = zeros(1, length(r_left)*length(q)*3);
+LUTidx = 1;
+x = zeros(length(r_left),length(q));
+y = zeros(length(r_left),length(q));
+c = uint8(zeros(length(r_left),length(q),3));
+
+% Construction of LUT for Short blade
+for j = 1:length(q), for i = 1:length(r_left)
+    theta = -q(j)+pi/2;
+    x(i,j) = r_left(i)*cos(theta); % inches
+    y(i,j) = r_left(i)*sin(theta); % inches
+
+    % Transforming from corner-origin cartesian coordinates to
+    % centered polar coordinates
+    x_transform = max(round(w/2+x(i,j)*scalex),1);
+    y_transform = max(round(h/2-y(i,j)*scaley),1);
+    
+    % Produce a twist proportional to radius s/r = theta
+    theta_twist = theta+twist_const*r(i)/r_max*2*pi;
+    x_twist = r(i)*cos(theta_twist);
+    y_twist = r(i)*sin(theta_twist);
+    x_transform_twist = max(round(w/2+x_twist*scalex),1);
+    y_transform_twist = max(round(h/2-y_twist*scaley),1);
+    
+    rgb = C(y_transform_twist,x_transform_twist,:);
+    
+    % Brightness Compensation
+    c(i,j,:) = uint8(rgb * brightness_comp(i,j));
+    % Reformat data into flat array and in RBG color ordering
+    LUT_short(LUTidx:LUTidx+2) = [rgb(1) rgb(3) rgb(2)] * brightness_comp(i,j);
+    LUTidx = LUTidx + 3;
+end, end
+
+nexttile;
+x_prime = reshape(x,[size(x,1)*size(x,2) 1]);
+y_prime = reshape(y,[size(y,1)*size(y,2) 1]);
+c_prime = reshape(c,[size(c,1)*size(c,2) 3]);
+scatter(x_prime,y_prime,10,double(c_prime)/255,"filled"); grid on; axis equal;
+xlabel('x (inches)'); ylabel('y (inches)');
+xlim([-13 13]); ylim([-13 13]); title("Rendered LUT Short");
+
+
+% Generating the LUT file as a csv file
+[pathstr,name,ext] = fileparts(info.Filename);
+writematrix(LUT_long,sprintf("LUT_long-%s.csv", name));
+writematrix(LUT_short,sprintf("LUT_short-%s.csv", name));
 
 
 %% Simulation
