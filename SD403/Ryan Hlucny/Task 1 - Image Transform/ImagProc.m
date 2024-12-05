@@ -1,6 +1,6 @@
 %% Image importing
 addpath("Images\");
-imgpath = 'NDSU.png';
+imgpath = 'matlab.png';
 info = imfinfo(imgpath)
 % Handle indexed and RGB images
 if (info.ColorType == "indexed")
