@@ -9,7 +9,7 @@
 
 #define VERBOSE false
 
-#define SPI_FREQ 33000000
+#define SPI_FREQ 16000000
 #define NUM_LEDS 53
 
 #define FLASH_TIMER_FREQ    1000
@@ -64,68 +64,63 @@ bool flash_led_callback(struct repeating_timer *t) {
         angle_idx = (int) (angle_mod * NUM_ANGLE_DIVISIONS / M_TWOPI);
     }
 
-    // New efficient method of setting LED pixel arrays
-    uint8_t* ptr0 = (uint8_t*)(p_short + NUM_LEDS*3*(NUM_ANGLE_DIVISIONS-angle_idx-1));
-    uint8_t* ptr1 = (uint8_t*)(p_long + NUM_LEDS*3*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    // Pointers for regular LUTs
+    // uint8_t* ptr0 = (uint8_t*)(p_short + NUM_LEDS*3*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    // uint8_t* ptr1 = (uint8_t*)(p_long + NUM_LEDS*3*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+
+    // Pointers for async LUTs
+    uint8_t* ptr0 = (uint8_t*)(p_short + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    uint8_t* ptr1 = (uint8_t*)(p_long + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    
     ledStrip0.setPixelArrayPtr(ptr0);
     ledStrip1.setPixelArrayPtr(ptr1);
 
-    ledStrip0.write();
-    ledStrip1.write();
+    ledStrip0.writeAsync((size_t) NUM_LEDS*4+8);
+    ledStrip1.writeAsync((size_t) NUM_LEDS*4+8);
     return true;
 }
-
-sensors_event_t accel;
-sensors_event_t gyro;
-sensors_event_t mag;
-sensors_event_t temp;
-
-float prev_angle = 0;
-// Filter Parameters
-float a = 0.8;
-float b = 1 - a;
 
 // timer1 ISR
-bool icm_read_callback(struct repeating_timer *t) {
-    icm.getEvent(&accel, &gyro, &temp, &mag);
-    float angle = atan2(accel.acceleration.x, accel.acceleration.y);
-    float dq = angle - prev_angle;
+// bool icm_read_callback(struct repeating_timer *t) {
+//     icm.getEvent(&accel, &gyro, &temp, &mag);
+//     float angle = atan2(accel.acceleration.x, accel.acceleration.y);
+//     float dq = angle - prev_angle;
 
-    // Unwrap sensor readings
-    if (dq >= M_PI) {
-        while (!(dq < M_PI)) {
-            angle -= M_TWOPI;
-            dq = angle - prev_angle;
-        }
-    }
-    else if (dq <= - M_PI) {
-        while (!(dq > -M_PI)) {
-            angle += M_TWOPI;
-            dq = angle - prev_angle;
-        }
-    }
+//     // Unwrap sensor readings
+//     if (dq >= M_PI) {
+//         while (!(dq < M_PI)) {
+//             angle -= M_TWOPI;
+//             dq = angle - prev_angle;
+//         }
+//     }
+//     else if (dq <= - M_PI) {
+//         while (!(dq > -M_PI)) {
+//             angle += M_TWOPI;
+//             dq = angle - prev_angle;
+//         }
+//     }
     
-    // Apply IIR low-pass filter
-    prev_output = curr_output;
-    curr_output = a * prev_output + b * angle;
-    prev_time = curr_time;
-    curr_time = micros();
+//     // Apply IIR low-pass filter
+//     prev_output = curr_output;
+//     curr_output = a * prev_output + b * angle;
+//     prev_time = curr_time;
+//     curr_time = micros();
     
-    if (VERBOSE) {
-        Serial.print("a_x: ");
-        Serial.print(accel.acceleration.x);
-        Serial.print(" \ta_y: ");
-        Serial.print(accel.acceleration.y);
-        Serial.print(" \tangle: ");
-        Serial.print(angle);
-        Serial.print(" \ty: ");
-        Serial.print(curr_output);
-    }
+//     if (VERBOSE) {
+//         Serial.print("a_x: ");
+//         Serial.print(accel.acceleration.x);
+//         Serial.print(" \ta_y: ");
+//         Serial.print(accel.acceleration.y);
+//         Serial.print(" \tangle: ");
+//         Serial.print(angle);
+//         Serial.print(" \ty: ");
+//         Serial.print(curr_output);
+//     }
 
-    prev_angle = angle;
+//     prev_angle = angle;
 
-    return true;
-}
+//     return true;
+// }
 
 bool led_strip_setup() {
     // Setting up pins 
@@ -197,6 +192,20 @@ void setup() {
     Serial.println("LED Interrupt attached");
 }
 
+sensors_event_t accel;
+sensors_event_t gyro;
+sensors_event_t mag;
+sensors_event_t temp;
+
+float prev_angle = 0;
+// Filter Parameters
+float a = 0.8;
+float b = 1 - a;
+
+unsigned long prev_imu_time = micros();
+// 50 hz -> 1/50 (20 ms, or 20000 us)
+const int K_IMU_MEASURE_PERIOD = 20000;
+
 void loop() {
     // digitalWrite(LED_BUILTIN, HIGH);
     // Serial.println("Setting LED HIGH");
@@ -220,41 +229,44 @@ void loop() {
     // delay(500);
 
     // ICM code
+    if (micros() - prev_imu_time > K_IMU_MEASURE_PERIOD) {
 
-    icm.getEvent(&accel, &gyro, &temp, &mag);
-    float angle = atan2(accel.acceleration.x, accel.acceleration.y);
-    float dq = angle - prev_angle;
+        icm.getEvent(&accel, &gyro, &temp, &mag);
+        float angle = atan2(accel.acceleration.x, accel.acceleration.y);
+        float dq = angle - prev_angle;
 
-    // Unwrap sensor readings
-    if (dq >= M_PI) {
-        while (!(dq < M_PI)) {
-            angle -= M_TWOPI;
-            dq = angle - prev_angle;
+        // Unwrap sensor readings
+        if (dq >= M_PI) {
+            while (!(dq < M_PI)) {
+                angle -= M_TWOPI;
+                dq = angle - prev_angle;
+            }
         }
-    }
-    else if (dq <= - M_PI) {
-        while (!(dq > -M_PI)) {
-            angle += M_TWOPI;
-            dq = angle - prev_angle;
+        else if (dq <= - M_PI) {
+            while (!(dq > -M_PI)) {
+                angle += M_TWOPI;
+                dq = angle - prev_angle;
+            }
         }
-    }
-    
-    // Apply IIR low-pass filter
-    prev_output = curr_output;
-    curr_output = a * prev_output + b * angle;
-    prev_time = curr_time;
-    curr_time = micros();
-    
-    if (VERBOSE) {
-        Serial.print("a_x: ");
-        Serial.print(accel.acceleration.x);
-        Serial.print(" \ta_y: ");
-        Serial.print(accel.acceleration.y);
-        Serial.print(" \tangle: ");
-        Serial.print(angle);
-        Serial.print(" \ty: ");
-        Serial.print(curr_output);
-    }
+        
+        // Apply IIR low-pass filter
+        prev_output = curr_output;
+        curr_output = a * prev_output + b * angle;
+        prev_time = curr_time;
+        curr_time = micros();
+        
+        if (VERBOSE) {
+            Serial.print("a_x: ");
+            Serial.print(accel.acceleration.x);
+            Serial.print(" \ta_y: ");
+            Serial.print(accel.acceleration.y);
+            Serial.print(" \tangle: ");
+            Serial.print(angle);
+            Serial.print(" \ty: ");
+            Serial.print(curr_output);
+        }
 
-    prev_angle = angle;
+        prev_angle = angle;
+        prev_imu_time = micros();
+    }
 }

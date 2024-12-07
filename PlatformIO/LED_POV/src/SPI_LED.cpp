@@ -112,29 +112,15 @@ void SPI_LED::writeAsync(size_t size) {
     if (!pixelArrayPtr)
         return;
 
-    uint8_t *ptr = pixelArrayPtr;
-    uint16_t n = numLEDs, i;
+    // uint8_t *ptr = pixelArrayPtr;
+    // uint16_t n = numLEDs, i;
+
+    if (!spi->finishedAsync())
+        spi->endTransaction();
 
     spi->beginTransaction(spiSettings);
 
-    // *** Start Frame ***
-    for (i = 0; i < 4; i++)
-        spi->transferAsync(&K_0x00, nullptr, sizeof(K_0x00));
-    
-    // *** Pixel Data ***
-    do {
-        spi->transferAsync(&K_0xFF, nullptr, sizeof(K_0xFF)); // Pixel start (setting global brightness frame to full)
-        // for (i = 0; i < 3; i++)
-        //     spi->transferAsync(*ptr++, nullptr, size); // Color Data
-    } while (--n);
-
-    // *** End Frame *** 
-    // The number of bytes in the end frame is determined by the length of the strip,
-    // Since its function is to allow the strip colors to propogate through the rest of the strip 
-    for (i = 0; i < ((numLEDs + 15) / 16); i++)
-        spi->transferAsync(&K_0xFF, nullptr, sizeof(K_0xFF));
-
-    spi->endTransaction();
+    spi->transferAsync(pixelArrayPtr, nullptr, size);
 }
 
 /**

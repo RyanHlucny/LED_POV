@@ -174,42 +174,18 @@ writematrix(LUT_short,sprintf("LUT_short-%s.csv", name));
 LUT_async_long = zeros(1, length(LUT_long)+length(q)*(4+num_LEDs_right+floor((num_LEDs_right+15)/16)));
 LUT_async_short = zeros(1, length(LUT_short)+length(q)*(4+num_LEDs_left+floor((num_LEDs_left+15)/16)));
 
-jc = 1;
-ic = 1;
+led_idx = 0;
+j = 0;
 for i = 1:length(q)
-    for d = 1:4
-        LUT_async_long(jc) = 0;
-        jc = jc+1;
-    end
-    for d = 1:num_LEDs_right
-        LUT_async_long(jc) = 255; jc = jc+1;
-        LUT_async_long(jc:jc+2) = LUT_long(ic:ic+2);
-        jc = jc+3; ic = ic+3;
-    end
-    for d = 1:floor((num_LEDs_right+15)/16)
-        LUT_async_long(jc) = 255; jc = jc+1;
-    end
+    for i = 1:range(4)
+    LUT_async_long((i-1)* + (1:4)) = [0 0 0 0];
+    LUT_async_long()
+
 end
 
-ic = 1;
-jc = 1;
-for i = 1:length(q)
-    for d = 1:4
-        LUT_async_short(jc) = 0;
-        jc = jc+1;
-    end
-    for d = 1:num_LEDs_left
-        LUT_async_short(jc) = 255; jc = jc+1;
-        LUT_async_short(jc:jc+2) = LUT_short(ic:ic+2);
-        jc = jc+3; ic = ic+3;
-    end
-    for d = 1:floor((num_LEDs_left+15)/16)
-        LUT_async_short(jc) = 255; jc = jc+1;
-    end
+for i = 1:length(LUT_async_long)
+    LUT_async_long(i) 
 end
-
-writematrix(LUT_async_long,sprintf("LUT_async_long-%s.csv", name));
-writematrix(LUT_async_short,sprintf("LUT_async_short-%s.csv", name));
 
 %% Simulation
 % figure(4); clf(4); hold on; grid on; axis equal;
