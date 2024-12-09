@@ -9,18 +9,18 @@
 
 #define VERBOSE false
 
-#define SPI_FREQ 16000000
+#define SPI_FREQ 33000000
+// 50 hz -> 1/50 (20 ms, or 20000 us)
+#define IMU_MEASURE_PERIOD_US 20000
 #define NUM_LEDS 53
 
-#define FLASH_TIMER_FREQ    1000
-#define ICM_TIMER_FREQ      100 // 1000
+#define FLASH_TIMER_FREQ    2000
 
 // LUT Constants
 #define NUM_ANGLE_DIVISIONS 333
 
 // Creating LED Strip objects
-SPI_LED ledStrip0(NUM_LEDS, RBG, &SPI, SPISettings(SPI_FREQ, MSBFIRST, SPI_MODE0));
-SPI_LED ledStrip1(NUM_LEDS, RBG, &SPI1, SPISettings(SPI_FREQ, MSBFIRST, SPI_MODE0));
+SPISettings spi_settings(SPI_FREQ, MSBFIRST, SPI_MODE0);
 
 // Creating ICM sensor
 Adafruit_ICM20948 icm;
@@ -39,7 +39,7 @@ unsigned long prev_time = micros();
 unsigned long curr_time = micros();
 float prev_output = 0;
 float curr_output = prev_output;
-double angle_trim = M_PI / 2;
+double angle_trim = 0;//M_PI / 2;
 
 unsigned long now;
 double m;
@@ -47,8 +47,13 @@ double sample;
 double angle_mod;
 unsigned long dt;
 
+int dma_chan0;
+int dma_chan1;
+
 // timer0 ISR
 bool flash_led_callback(struct repeating_timer *t) {
+    static bool first_run = true;
+
     // Handle linear interpolation
     dt = curr_time - prev_time;
     if (dt > 0) {
@@ -71,59 +76,79 @@ bool flash_led_callback(struct repeating_timer *t) {
     // Pointers for async LUTs
     uint8_t* ptr0 = (uint8_t*)(p_short + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
     uint8_t* ptr1 = (uint8_t*)(p_long + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
-    
-    ledStrip0.setPixelArrayPtr(ptr0);
-    ledStrip1.setPixelArrayPtr(ptr1);
 
-    ledStrip0.writeAsync((size_t) NUM_LEDS*4+8);
-    ledStrip1.writeAsync((size_t) NUM_LEDS*4+8);
+    if (first_run) {
+        SPI.beginTransaction(spi_settings);
+        SPI1.beginTransaction(spi_settings);
+        first_run = false;
+    }
+
+    dma_channel_set_read_addr(dma_chan0, ptr0, true);
+    dma_channel_set_read_addr(dma_chan1, ptr1, true);
+
     return true;
 }
 
-// timer1 ISR
-// bool icm_read_callback(struct repeating_timer *t) {
-//     icm.getEvent(&accel, &gyro, &temp, &mag);
-//     float angle = atan2(accel.acceleration.x, accel.acceleration.y);
-//     float dq = angle - prev_angle;
+bool dma_setup() {
+    // DMA channel 0 setup
+    dma_chan0 = dma_claim_unused_channel(true);
+    uint transfer_count = 220*2;//NUM_LEDS*4 + 8;
+    if (dma_chan0 == -1)
+        return false;
 
-//     // Unwrap sensor readings
-//     if (dq >= M_PI) {
-//         while (!(dq < M_PI)) {
-//             angle -= M_TWOPI;
-//             dq = angle - prev_angle;
-//         }
-//     }
-//     else if (dq <= - M_PI) {
-//         while (!(dq > -M_PI)) {
-//             angle += M_TWOPI;
-//             dq = angle - prev_angle;
-//         }
-//     }
+    hw_write_masked(&spi0_hw->cr0, (8-1) << SPI_SSPCR0_DSS_LSB, SPI_SSPCR0_DSS_BITS);
+
+    dma_channel_config c = dma_channel_get_default_config(dma_chan0);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_8);
+    channel_config_set_read_increment(&c, true);
+    channel_config_set_write_increment(&c, false);
+    channel_config_set_dreq(&c, spi_get_dreq(spi0, true));
+    // channel_config_set_chain_to(&c, dma_chan0);
+    channel_config_set_irq_quiet(&c, true);
     
-//     // Apply IIR low-pass filter
-//     prev_output = curr_output;
-//     curr_output = a * prev_output + b * angle;
-//     prev_time = curr_time;
-//     curr_time = micros();
+    dma_channel_configure(
+        dma_chan0, 
+        &c, 
+        &spi0_hw->dr,   // Write address
+        NULL,           // Read address
+        transfer_count, // transfer count (220 bytes)
+        false
+    );
+
+    spi0_hw->dmacr = 1 | (1 << 1);
+
+    // DMA channel 1 setup
+    dma_chan1 = dma_claim_unused_channel(true);
+    if (dma_chan1 == -1)
+        return false;
+
+    hw_write_masked(&spi1_hw->cr0, (8-1) << SPI_SSPCR0_DSS_LSB, SPI_SSPCR0_DSS_BITS);
+
+    c = dma_channel_get_default_config(dma_chan1);
+    channel_config_set_transfer_data_size(&c, DMA_SIZE_8);
+    channel_config_set_read_increment(&c, true);
+    channel_config_set_write_increment(&c, false);
+    channel_config_set_dreq(&c, spi_get_dreq(spi1, true));
+    // channel_config_set_chain_to(&c, dma_chan1);
+    channel_config_set_irq_quiet(&c, true);
     
-//     if (VERBOSE) {
-//         Serial.print("a_x: ");
-//         Serial.print(accel.acceleration.x);
-//         Serial.print(" \ta_y: ");
-//         Serial.print(accel.acceleration.y);
-//         Serial.print(" \tangle: ");
-//         Serial.print(angle);
-//         Serial.print(" \ty: ");
-//         Serial.print(curr_output);
-//     }
+    dma_channel_configure(
+        dma_chan1, 
+        &c, 
+        &spi1_hw->dr,   // Write address
+        NULL,         // Read address
+        transfer_count, // transfer count (220 bytes)
+        false
+    );
 
-//     prev_angle = angle;
+    spi1_hw->dmacr = 1 | (1 << 1);
 
-//     return true;
-// }
+    return true;
+}
 
 bool led_strip_setup() {
     // Setting up pins 
+    
     pinMode(PIN_SPI0_MOSI, OUTPUT);
     pinMode(PIN_SPI0_SCK, OUTPUT);
     pinMode(PIN_SPI0_SS, OUTPUT);
@@ -148,15 +173,12 @@ bool led_strip_setup() {
     digitalWrite(PIN_SPI1_SS, LOW);
     Serial.println("Set SPI CS pin");
 
-    ledStrip0.begin();
-    ledStrip1.begin();
-    Serial.println("Beginning led strip");
-    ledStrip0.clear();
-    ledStrip1.clear();
-    Serial.println("LED strip cleared");
-    ledStrip0.write();
-    ledStrip1.write();
-    Serial.println("LED strip written with clear");
+    sleep_ms(10);
+
+    SPI.begin();
+    SPI1.begin();
+    sleep_ms(20);
+
     return true;
 }
 
@@ -165,6 +187,14 @@ void setup() {
         
     Serial.println("Starting setup");
     pinMode(LED_BUILTIN, OUTPUT);
+    Serial.println("Setting up DMA channels");
+    if (!dma_setup()) {
+        while (1) {
+            Serial.println("Failed to setup DMA channels");
+            delay(1000);
+        }
+    }
+
     Serial.println("Setting up LED strips");
     if (!led_strip_setup()) {
         while (1) {
@@ -183,10 +213,6 @@ void setup() {
     delay(100);
     Serial.println("ICM20948 Found!");
 
-    // timer1.attachInterrupt(ICM_TIMER_FREQ, icm_read_callback);
-    // delay(100);
-    // Serial.println("ICM Interrupt attached");
-
     timer0.attachInterrupt(FLASH_TIMER_FREQ, flash_led_callback);
     delay(100);
     Serial.println("LED Interrupt attached");
@@ -203,33 +229,11 @@ float a = 0.8;
 float b = 1 - a;
 
 unsigned long prev_imu_time = micros();
-// 50 hz -> 1/50 (20 ms, or 20000 us)
-const int K_IMU_MEASURE_PERIOD = 20000;
 
 void loop() {
-    // digitalWrite(LED_BUILTIN, HIGH);
-    // Serial.println("Setting LED HIGH");
-    // Serial.println(angle_idx);
-
-    // Serial.print("angle_idx: ");
-    // Serial.print(angle_idx);
-    // Serial.print("\t dt: ");
-    // Serial.print((int) (curr_time - prev_time));
-    // Serial.print("\t prev_output: ");
-    // Serial.print(prev_output);
-    // Serial.print("\t curr_ouput: ");
-    // Serial.print(curr_output);
-    // Serial.print("\t prev_angle: ");
-    // Serial.println(prev_angle);
-    // delay(100);
-
-    // digitalWrite(LED_BUILTIN, LOW);
-    // Serial.println("Setting LED LOW");
-    // Serial.println(angle_idx);
-    // delay(500);
 
     // ICM code
-    if (micros() - prev_imu_time > K_IMU_MEASURE_PERIOD) {
+    if (micros() - prev_imu_time > IMU_MEASURE_PERIOD_US) {
 
         icm.getEvent(&accel, &gyro, &temp, &mag);
         float angle = atan2(accel.acceleration.x, accel.acceleration.y);

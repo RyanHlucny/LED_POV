@@ -117,7 +117,9 @@ void SPI_LED::writeAsync(size_t size) {
 
     if (!spi->finishedAsync())
         spi->endTransaction();
-
+    // sleep_us(50);
+    
+    // time delay here?
     spi->beginTransaction(spiSettings);
 
     spi->transferAsync(pixelArrayPtr, nullptr, size);
