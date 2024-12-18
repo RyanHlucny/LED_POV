@@ -10,11 +10,14 @@
 #define VERBOSE false
 
 #define SPI_FREQ 33000000
-// 50 hz -> 1/50 (20 ms, or 20000 us)
-#define IMU_MEASURE_PERIOD_US 20000
 #define NUM_LEDS 53
+#define NUM_IMAGES 2
+#define IMAGE_PERIOD_US 10*1000*1000 // 5 seconds
 
-#define FLASH_TIMER_FREQ    2000
+#define FLASH_TIMER_FREQ    8000
+// 50 hz -> 1/50 (20 ms, or 20000 us)
+// 500 
+#define IMU_MEASURE_PERIOD_US 2000
 
 // LUT Constants
 #define NUM_ANGLE_DIVISIONS 333
@@ -27,19 +30,16 @@ Adafruit_ICM20948 icm;
 
 // Creating timer for running LED interrupts
 RPI_PICO_Timer timer0(0);
-RPI_PICO_Timer timer1(1);
 
-uint8_t color_array0[NUM_LEDS*3];
-uint8_t color_array1[NUM_LEDS*3];
-const uint8_t* p_short = &(LUT::LUT_short[0]);
-const uint8_t* p_long = &(LUT::LUT_long[0]);
+uint8_t* p_short = (uint8_t*) &(LUT::LUT_0S[0]); // initial image
+// const uint8_t* p_long = &(LUT::LUT_0L[0]); // initial image
 uint16_t angle_idx = 0;
 
 unsigned long prev_time = micros();
 unsigned long curr_time = micros();
 float prev_output = 0;
 float curr_output = prev_output;
-double angle_trim = 0;//M_PI / 2;
+double angle_trim = 1.92;//- 0.175 + M_PI/2; //M_PI / 2;
 
 unsigned long now;
 double m;
@@ -74,8 +74,8 @@ bool flash_led_callback(struct repeating_timer *t) {
     // uint8_t* ptr1 = (uint8_t*)(p_long + NUM_LEDS*3*(NUM_ANGLE_DIVISIONS-angle_idx-1));
 
     // Pointers for async LUTs
-    uint8_t* ptr0 = (uint8_t*)(p_short + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
-    uint8_t* ptr1 = (uint8_t*)(p_long + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    // uint8_t* ptr0 = (uint8_t*)(p_long + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
+    uint8_t* ptr1 = (uint8_t*)(p_short + (NUM_LEDS*4 + 8)*(NUM_ANGLE_DIVISIONS-angle_idx-1));
 
     if (first_run) {
         SPI.beginTransaction(spi_settings);
@@ -83,8 +83,8 @@ bool flash_led_callback(struct repeating_timer *t) {
         first_run = false;
     }
 
-    dma_channel_set_read_addr(dma_chan0, ptr0, true);
-    dma_channel_set_read_addr(dma_chan1, ptr1, true);
+    // dma_channel_set_read_addr(dma_chan0, ptr0, true); // long blade
+    dma_channel_set_read_addr(dma_chan1, ptr1, true); // short blade
 
     return true;
 }
@@ -225,10 +225,12 @@ sensors_event_t temp;
 
 float prev_angle = 0;
 // Filter Parameters
-float a = 0.8;
+float a = 0.95; // Think we should try a higher value to smooth this more.
 float b = 1 - a;
 
 unsigned long prev_imu_time = micros();
+unsigned long prev_image_time = micros();
+int image_idx = 0; // Initially 0
 
 void loop() {
 
@@ -236,26 +238,29 @@ void loop() {
     if (micros() - prev_imu_time > IMU_MEASURE_PERIOD_US) {
 
         icm.getEvent(&accel, &gyro, &temp, &mag);
+        static int wrap_counter = 0;
         float angle = atan2(accel.acceleration.x, accel.acceleration.y);
-        float dq = angle - prev_angle;
+        float dq = (angle + wrap_counter * M_TWOPI) - prev_angle;
 
         // Unwrap sensor readings
         if (dq >= M_PI) {
             while (!(dq < M_PI)) {
-                angle -= M_TWOPI;
-                dq = angle - prev_angle;
+                // angle -= M_TWOPI;
+                wrap_counter--;
+                dq = (angle + wrap_counter * M_TWOPI) - prev_angle;
             }
         }
         else if (dq <= - M_PI) {
             while (!(dq > -M_PI)) {
-                angle += M_TWOPI;
-                dq = angle - prev_angle;
+                // angle += M_TWOPI;
+                wrap_counter++;
+                dq = (angle + wrap_counter * M_TWOPI) - prev_angle;
             }
         }
         
         // Apply IIR low-pass filter
         prev_output = curr_output;
-        curr_output = a * prev_output + b * angle;
+        curr_output = a * prev_output + b * (angle + wrap_counter * M_TWOPI);
         prev_time = curr_time;
         curr_time = micros();
         
@@ -270,7 +275,39 @@ void loop() {
             Serial.print(curr_output);
         }
 
-        prev_angle = angle;
+        prev_angle = (angle + wrap_counter * M_TWOPI);
         prev_imu_time = micros();
+    }
+
+    
+    if (micros() - prev_image_time > IMAGE_PERIOD_US) {
+
+        switch (image_idx) {
+            case 0:
+                p_short = (uint8_t*) &(LUT::LUT_0S[0]);
+                // p_long = &(LUT::LUT_0L[0]);
+                break;
+            case 1:
+                p_short = (uint8_t*) &(LUT::LUT_1S[0]);
+                // p_long = &(LUT::LUT_1L[0]);
+                break;
+            // case 2:
+            //     p_short = (uint8_t*) &(LUT::LUT_2S[0]);
+            //     // p_long = &(LUT::LUT_2L[0]);
+            //     break;
+            // case 3:
+            //     p_short = (uint8_t*) &(LUT::LUT_3S[0]);
+            //     // p_long = &(LUT::LUT_3L[0]);
+            //     break;
+            // case 4:
+            //     p_short = (uint8_t*) &(LUT::LUT_4S[0]);
+            //     // p_long = &(LUT::LUT_4L[0]);
+            //     break;
+            default:
+                p_short = (uint8_t*) &(LUT::LUT_0S[0]);
+                // p_long = &(LUT::LUT_0L[0]);
+        }
+        image_idx = fmod(image_idx+1,NUM_IMAGES);
+        prev_image_time = micros();
     }
 }
