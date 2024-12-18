@@ -1,22 +1,21 @@
 
-% Fs = 1e3;
-% dt = 1/Fs;
-% T_end = 3;
-% t = 0:dt:T_end-dt;
-% 
-% f_target = 10; % hz
-% A = 10e3;
-% DC = 30e3;
-% data = A*sin(2*pi*f_target*t) + DC;
-% noise_std = 1e3;
-% data_noise = data + noise_std.*randn(size(data));
+Fs = 10e3;
+dt = 1/Fs;
+T_end = 0.5;
+t = 0:dt:T_end-dt;
 
-t = data(:,1)/1e6;
-data_noise = data(:,2);
+f_target = 100; % hz
+A = 10e3;
+DC = 30e3;
+data = A*sin(2*pi*f_target*t) + DC;
+noise_std = 1e3;
+data_noise = data + noise_std.*randn(size(data));
+
+% t = data(:,1)/1e6;
+% data_noise = data(:,2);
 
 figure; tiledlayout('vertical'); nexttile;
-% plot(t, data); grid on; nexttile;
-plot(t, data_noise); grid on;
+plot(t, data_noise); grid on; title('Raw Signal with Moving Average')
 
 W = 500;
 avg = zeros(size(t));
@@ -68,9 +67,16 @@ for i = 1:length(t)
 end
 
 hold on; plot(t, avg); nexttile;
-hold on; plot(t, filtered_data); plot(t, avg); grid on; nexttile;
-hold on; plot(t, DC_blocked_data); grid on;
+hold on; plot(t, filtered_data); plot(t, avg); grid on; title('Low-Pass Filtered Signal with Moving Average'); nexttile;
+hold on; plot(t, DC_blocked_data); grid on; title('DC-Shifted Signal with Thresholds')
 plot(t,upper_env); plot(t,lower_env); nexttile;
-plot(t, trigger); grid on; nexttile;
+plot(t, trigger); grid on; title('Trigger Pulses'); nexttile;
 plot(t(f_calculated~=0), f_calculated(f_calculated~=0)); grid on;
-hold on; plot(t(f_calculated~=0), f_calculated(f_calculated~=0),'o');
+hold on; plot(t(f_calculated~=0), f_calculated(f_calculated~=0),'o'); title('Live Frequency Reading')
+
+%% Statistics
+d = f_calculated(f_calculated ~= 0);
+d = d(3:end)
+mu = mean(d)
+st_dev = std(d)
+
