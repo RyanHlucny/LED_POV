@@ -5,7 +5,6 @@ from time import ticks_us, ticks_ms
 
 @asm_pio(out_init=PIO.OUT_LOW,sideset_init=(PIO.OUT_LOW,PIO.OUT_HIGH),out_shiftdir=PIO.SHIFT_LEFT,autopull=True,pull_thresh=32)
 def display_4x7():
-    
     wrap_target()
     out(pins,1)			.side((1 << 1) | 0)
     nop()				.side((1 << 1) | 1)
@@ -26,7 +25,6 @@ adc = ADC(0)
 # RPM measurement ISR
 W = 500
 num_blades = 7
-# samps = [0]*W
 filt = [0]*2
 avg = [0]*W
 t_last = ticks_us()
@@ -85,7 +83,7 @@ digits = {
     '9': [1,1,1,1,0,1,1,0]
     }
 
-def get_word_data(num):
+def convert_num_to_word(num):
     # digits = '0123'
     if len(num) is not 4:
         raise ValueError("Invalid Input: Input must be exactly 4 digits")
@@ -120,7 +118,7 @@ while True:
     if ticks_ms() - _time > 125:
         num_str = str(rpm)
         num_str = '0'*(4-len(num_str)) + num_str
-        data = get_word_data(num_str)
+        data = convert_num_to_word(num_str)
         print(f'Updating RPM as {num_str} at {ticks_ms()}')
         sm.put(data)
         _time = ticks_ms()
